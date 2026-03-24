@@ -1,0 +1,36 @@
+spring:
+  # DataSource URL is overridden at runtime by @DynamicPropertySource / Testcontainers
+  # auto-configuration when the PostgreSQL container is used.
+  # For pure unit tests that don't load a Spring context this file is ignored anyway.
+  datasource:
+    url: jdbc:tc:postgresql:16:///scenarios?TC_REUSABLE=true
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers:localhost:9092}
+    consumer:
+      group-id: test-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+temporal:
+  connection:
+    target: localhost:7233
+
+logging:
+  level:
+    com.demo: WARN
+    org.springframework: WARN
+    io.temporal: ERROR
+    org.testcontainers: WARN
+    com.github.dockerjava: WARN

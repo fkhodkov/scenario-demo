@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface ScenarioExecutionRepository extends JpaRepository<ScenarioExecution, UUID> {
     Optional<ScenarioExecution> findByWorkflowId(String workflowId);
-    List<ScenarioExecution> findByScenarioIdOrderByStartedAtDesc(UUID scenarioId);
+    List<ScenarioExecution> findByScenario_IdOrderByStartedAtDesc(UUID scenarioId);
     List<ScenarioExecution> findByUserId(String userId);
 }

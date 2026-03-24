@@ -122,7 +122,7 @@ public class ScenarioService {
     }
 
     public List<ScenarioExecution> listExecutions(UUID scenarioId) {
-        return executionRepo.findByScenarioIdOrderByStartedAtDesc(scenarioId);
+        return executionRepo.findByScenario_IdOrderByStartedAtDesc(scenarioId);
     }
 
     /** Returns [triggerTopic, triggerEventType] from the graph's TRIGGER node. */

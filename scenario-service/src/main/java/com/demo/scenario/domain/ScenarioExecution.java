@@ -1,5 +1,6 @@
 package com.demo.scenario.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -12,6 +13,7 @@ public class ScenarioExecution {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scenario_id", nullable = false)
     private Scenario scenario;
@@ -36,7 +38,9 @@ public class ScenarioExecution {
 
     // ── Getters ──
     public UUID getId()                  { return id; }
+    @JsonIgnore
     public Scenario getScenario()        { return scenario; }
+    public UUID getScenarioId()          { return scenario != null ? scenario.getId() : null; }
     public String getUserId()            { return userId; }
     public String getWorkflowId()        { return workflowId; }
     public ExecutionStatus getStatus()   { return status; }

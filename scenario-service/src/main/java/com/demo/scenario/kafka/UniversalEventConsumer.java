@@ -51,15 +51,22 @@ public class UniversalEventConsumer {
             return;
         }
 
+        // Derive eventType from the registry (topic -> canonical name)
         String eventType = EventRegistry.findByTopic(topic)
                 .map(EventRegistry.EventSpec::eventType)
                 .orElse(topic.toUpperCase().replace(".", "_"));
+
+        // Also read eventType from the payload itself — some producers stamp it explicitly.
+        // If present it takes precedence for trigger matching (allows one topic to carry
+        // multiple logical event types).
+        String payloadEventType = extractEventType(payload);
+        String effectiveEventType = payloadEventType != null ? payloadEventType : eventType;
 
         // 1. Start new workflow if this topic triggers an active scenario
         scenarioRepo.findByTriggerTopic(topic).ifPresent(scenario -> {
             if (scenario.getStatus() == ScenarioStatus.ACTIVE) {
                 String triggerEventType = scenario.getTriggerEventType();
-                if (triggerEventType == null || triggerEventType.equalsIgnoreCase(eventType)) {
+                if (triggerEventType == null || triggerEventType.equalsIgnoreCase(effectiveEventType)) {
                     try {
                         scenarioService.startExecution(scenario.getId(), userId, payload);
                     } catch (Exception e) {
@@ -72,6 +79,16 @@ public class UniversalEventConsumer {
 
         // 2. Signal all running workflows for this user
         signalService.routeEventToWorkflows(userId, eventType, topic, payload);
+    }
+
+    private String extractEventType(String json) {
+        try {
+            JsonNode node = objectMapper.readTree(json);
+            JsonNode et = node.get("eventType");
+            return (et != null && !et.isNull()) ? et.asText().trim() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String extractUserId(String json) {
