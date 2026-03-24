@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { scenarioApi, Scenario } from '../api'
+import { scenarioApi, Scenario } from '../api/index'
 import { Plus, Play, Pause, Edit3, Zap, Clock, CheckCircle, Archive, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 

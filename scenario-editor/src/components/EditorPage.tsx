@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { scenarioApi, eventApi } from '../api'
+import { scenarioApi, eventApi } from '../api/index'
 import { useEditorStore } from '../store/editorStore'
 import { ScenarioEditor } from './ScenarioEditor'
-import { SimulatorPanel } from './simulator/SimulatorPanel'
+import { SimulatorPanel } from './SimulatorPanel'
 import {
   ArrowLeft, Save, Play, Pause, Zap, FlaskConical,
   ChevronRight, RefreshCw, Users,

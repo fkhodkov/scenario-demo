@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { simulatorApi, EventSpec, OutboundMessage } from '../../api/index'
+import { simulatorApi, EventSpec, OutboundMessage } from '../api/index'
 import { Send, RefreshCw, CheckCircle, XCircle, Clock, Zap, Inbox } from 'lucide-react'
 import toast from 'react-hot-toast'
 

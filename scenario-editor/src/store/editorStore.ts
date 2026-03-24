@@ -9,7 +9,7 @@ import {
   EdgeChange,
   Connection,
 } from 'reactflow'
-import { EventSpec } from '../api'
+import { EventSpec } from '../api/index'
 
 export type NodeType =
   | 'trigger' | 'sendEmail' | 'sendPush' | 'sendSms'

@@ -8,10 +8,10 @@ import ReactFlow, {
   useReactFlow,
   Node,
 } from 'reactflow'
-import { useEditorStore, NodeType, NodeData } from '../../store/editorStore'
-import { nodeTypes } from '../nodes'
-import { NodePalette } from '../panels/NodePalette'
-import { NodePropertiesPanel } from '../panels/NodePropertiesPanel'
+import { useEditorStore, NodeType, NodeData } from '../store/editorStore'
+import { nodeTypes } from './FlowNodes'
+import { NodePalette } from './NodePalette'
+import { NodePropertiesPanel } from './NodePropertiesPanel'
 
 import 'reactflow/dist/style.css'
 

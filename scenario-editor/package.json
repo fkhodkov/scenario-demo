@@ -1,6 +1,6 @@
 {
   "name": "scenario-editor",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "dependencies": {
     "reactflow": "^11.11.3",
@@ -26,6 +26,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:docker": "vite build"
   }
 }
