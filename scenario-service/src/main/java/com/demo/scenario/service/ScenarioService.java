@@ -1,6 +1,7 @@
 package com.demo.scenario.service;
 
 import com.demo.scenario.domain.*;
+import com.demo.scenario.domain.ExecutionStatus;
 import com.demo.scenario.dto.ScenarioGraph;
 import com.demo.scenario.repository.ScenarioExecutionRepository;
 import com.demo.scenario.repository.ScenarioRepository;
@@ -93,6 +94,16 @@ public class ScenarioService {
 
         if (scenario.getStatus() != ScenarioStatus.ACTIVE) {
             throw new IllegalStateException("Scenario is not ACTIVE");
+        }
+
+        // Prevent duplicate: one RUNNING execution per user per scenario
+        if (executionRepo.existsByScenario_IdAndUserIdAndStatus(scenarioId, userId, ExecutionStatus.RUNNING)) {
+            log.info("Skipping duplicate execution for scenario {} user {} — already running", scenarioId, userId);
+            return executionRepo.findByUserId(userId).stream()
+                    .filter(e -> e.getScenarioId() != null && e.getScenarioId().equals(scenarioId)
+                              && e.getStatus() == ExecutionStatus.RUNNING)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Concurrent execution check failed"));
         }
 
         String workflowId = "scenario-" + scenarioId + "-user-" + userId + "-" + UUID.randomUUID();

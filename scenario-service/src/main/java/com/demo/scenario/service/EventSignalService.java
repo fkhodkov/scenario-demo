@@ -5,6 +5,8 @@ import com.demo.scenario.domain.ScenarioExecution;
 import com.demo.scenario.repository.ScenarioExecutionRepository;
 import com.demo.scenario.temporal.workflows.IncomingEvent;
 import com.demo.scenario.temporal.workflows.ScenarioWorkflow;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowNotFoundException;
 import org.slf4j.Logger;
@@ -20,11 +22,14 @@ public class EventSignalService {
 
     private final WorkflowClient workflowClient;
     private final ScenarioExecutionRepository executionRepo;
+    private final ObjectMapper objectMapper;
 
     public EventSignalService(WorkflowClient workflowClient,
-                               ScenarioExecutionRepository executionRepo) {
+                               ScenarioExecutionRepository executionRepo,
+                               ObjectMapper objectMapper) {
         this.workflowClient = workflowClient;
         this.executionRepo  = executionRepo;
+        this.objectMapper   = objectMapper;
     }
 
     public void routeEventToWorkflows(String userId, String eventType, String topic, String payload) {
@@ -38,6 +43,9 @@ public class EventSignalService {
         }
 
         IncomingEvent signal = new IncomingEvent(eventType, topic, userId, payload);
+        // Carry messageId from payload so workflows can match delivery events to the
+        // specific message they sent (fix for cross-contamination between unrelated comms).
+        signal.setMessageId(extractField(payload, "messageId"));
 
         for (ScenarioExecution exec : running) {
             try {
@@ -50,6 +58,15 @@ public class EventSignalService {
             } catch (Exception ex) {
                 log.error("Failed to signal workflow {}: {}", exec.getWorkflowId(), ex.getMessage());
             }
+        }
+    }
+    private String extractField(String json, String field) {
+        try {
+            JsonNode node = objectMapper.readTree(json);
+            JsonNode val = node.get(field);
+            return (val != null && !val.isNull()) ? val.asText() : null;
+        } catch (Exception e) {
+            return null;
         }
     }
 }

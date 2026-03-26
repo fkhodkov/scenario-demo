@@ -19,6 +19,15 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        # topicPattern=".*" uses regex subscription — Kafka rediscovers topics via
+        # metadata refresh. Default is 5 min; drop to 10s so new topics are picked up fast.
+        metadata.max.age.ms: 10000
+        # Reduce max wait time for fetch requests so signals reach Temporal quickly
+        fetch.max.wait.ms: 100
+        # Heartbeat more frequently to detect consumer lag early
+        heartbeat.interval.ms: 1000
+        session.timeout.ms: 10000
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer

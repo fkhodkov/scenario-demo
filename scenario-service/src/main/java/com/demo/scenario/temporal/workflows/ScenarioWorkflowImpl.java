@@ -132,6 +132,9 @@ public class ScenarioWorkflowImpl implements ScenarioWorkflow {
         String channel        = sent.getChannel();
         String deliveredEvent = channel.toUpperCase() + "_DELIVERED";
         String failedEvent    = channel.toUpperCase() + "_FAILED";
+        // The messageId we sent — only delivery events carrying this exact ID are relevant.
+        // This prevents cross-contamination when multiple emails are in flight for the same user.
+        String sentMessageId  = sent.getMessageId();
 
         long timeoutSeconds = findDownstreamTimeout(sendNode, graph, nodeMap, 86400L);
 
@@ -140,6 +143,12 @@ public class ScenarioWorkflowImpl implements ScenarioWorkflow {
         Workflow.await(Duration.ofSeconds(timeoutSeconds), () -> {
             for (IncomingEvent e : eventQueue) {
                 if (!input.getUserId().equals(e.getUserId())) continue;
+                // If the event carries a messageId, it must match the one we sent.
+                // Events with no messageId are accepted for backwards compatibility.
+                if (sentMessageId != null && e.getMessageId() != null
+                        && !sentMessageId.equals(e.getMessageId())) {
+                    continue;  // belongs to a different message — skip
+                }
                 if (deliveredEvent.equalsIgnoreCase(e.getEventType())) {
                     outcome.set("delivered");
                     eventQueue.remove(e);

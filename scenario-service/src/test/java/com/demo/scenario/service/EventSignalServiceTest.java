@@ -33,7 +33,7 @@ class EventSignalServiceTest {
 
     @BeforeEach
     void setUp() {
-        signalService = new EventSignalService(workflowClient, executionRepo);
+        signalService = new EventSignalService(workflowClient, executionRepo, new com.fasterxml.jackson.databind.ObjectMapper());
     }
 
     @Test
