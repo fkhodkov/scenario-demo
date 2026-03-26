@@ -92,27 +92,10 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!--
-                Byte Buddy 1.14.x (shipped with Mockito 5.11) only officially supports
-                Java ≤ 23. On Java 24+, pass -Dnet.bytebuddy.experimental=true so it
-                can still instrument classes. Without this, every @Mock on a concrete
-                class (ScenarioService, KafkaTemplate, …) fails at test startup.
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
-                </configuration>
-            </plugin>
-
             <!-- Separate integration-test phase -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
