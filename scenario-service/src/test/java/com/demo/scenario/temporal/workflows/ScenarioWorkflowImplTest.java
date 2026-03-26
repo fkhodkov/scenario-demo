@@ -245,6 +245,6 @@ class ScenarioWorkflowImplTest {
         awaitCompletion(wfId[0]);
 
         verify(mockActivities, atLeast(2))
-                .updateExecutionNode(eq(input.getExecutionId()), any(), any());
+                .updateExecutionNode(eq(input.executionId()), any(), any());
     }
 }

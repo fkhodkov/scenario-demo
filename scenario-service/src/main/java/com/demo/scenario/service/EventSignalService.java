@@ -42,10 +42,10 @@ public class EventSignalService {
             return;
         }
 
-        IncomingEvent signal = new IncomingEvent(eventType, topic, userId, payload);
         // Carry messageId from payload so workflows can match delivery events to the
-        // specific message they sent (fix for cross-contamination between unrelated comms).
-        signal.setMessageId(extractField(payload, "messageId"));
+        // specific message they sent — prevents cross-contamination between unrelated comms.
+        String messageId = extractField(payload, "messageId");
+        IncomingEvent signal = new IncomingEvent(eventType, topic, userId, payload, messageId);
 
         for (ScenarioExecution exec : running) {
             try {

@@ -9,18 +9,23 @@ class IncomingEventTest {
     @Test
     void allArgsConstructor_setsFields() {
         IncomingEvent e = new IncomingEvent("EMAIL_OPENED", "email.opened", "user_1", "{\"msgId\":\"x\"}");
-        assertEquals("EMAIL_OPENED",      e.getEventType());
-        assertEquals("email.opened",      e.getTopic());
-        assertEquals("user_1",            e.getUserId());
-        assertEquals("{\"msgId\":\"x\"}", e.getPayload());
+        assertEquals("EMAIL_OPENED",       e.eventType());
+        assertEquals("email.opened",       e.topic());
+        assertEquals("user_1",             e.userId());
+        assertEquals("{\"msgId\":\"x\"}", e.payload());
+        assertNull(e.messageId());
     }
 
     @Test
-    void noArgsConstructor_thenSetters() {
-        IncomingEvent e = new IncomingEvent();
-        e.setEventType("LINK_CLICKED");
-        e.setUserId("user_2");
-        assertEquals("LINK_CLICKED", e.getEventType());
-        assertEquals("user_2",       e.getUserId());
+    void fiveArgConstructor_includesMessageId() {
+        IncomingEvent e = new IncomingEvent("EMAIL_DELIVERED", "email.delivered", "user_1", "{}", "msg-abc");
+        assertEquals("msg-abc", e.messageId());
+    }
+
+    @Test
+    void recordEquality() {
+        IncomingEvent a = new IncomingEvent("T", "t", "u", "p", "mid");
+        IncomingEvent b = new IncomingEvent("T", "t", "u", "p", "mid");
+        assertEquals(a, b);
     }
 }

@@ -125,109 +125,109 @@ class ScenarioGraphTest {
     void deserialize_nodesAndEdges() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        assertNotNull(graph.getNodes());
-        assertNotNull(graph.getEdges());
-        assertEquals(6, graph.getNodes().size());
-        assertEquals(5, graph.getEdges().size());
+        assertNotNull(graph.nodes());
+        assertNotNull(graph.edges());
+        assertEquals(6, graph.nodes().size());
+        assertEquals(5, graph.edges().size());
     }
 
     @Test
     void triggerNode_hasCorrectData() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioNode trigger = graph.getNodes().stream()
-                .filter(n -> "TRIGGER".equals(n.getType()))
+        ScenarioGraph.ScenarioNode trigger = graph.nodes().stream()
+                .filter(n -> "TRIGGER".equals(n.type()))
                 .findFirst()
                 .orElseThrow();
 
-        assertEquals("node_1",         trigger.getId());
-        assertEquals("USER_REGISTERED", trigger.getData().getEventType());
-        assertEquals("user.registered", trigger.getData().getTopic());
-        assertEquals("User Registered", trigger.getData().getLabel());
+        assertEquals("node_1",         trigger.id());
+        assertEquals("USER_REGISTERED", trigger.data().eventType());
+        assertEquals("user.registered", trigger.data().topic());
+        assertEquals("User Registered", trigger.data().label());
     }
 
     @Test
     void sendEmailNode_hasTemplateId() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioNode sendEmail = graph.getNodes().stream()
-                .filter(n -> "SEND_EMAIL".equals(n.getType()))
+        ScenarioGraph.ScenarioNode sendEmail = graph.nodes().stream()
+                .filter(n -> "SEND_EMAIL".equals(n.type()))
                 .findFirst().orElseThrow();
 
-        assertEquals("welcome_v1", sendEmail.getData().getTemplateId());
-        assertEquals("email",      sendEmail.getData().getChannel());
+        assertEquals("welcome_v1", sendEmail.data().templateId());
+        assertEquals("email",      sendEmail.data().channel());
     }
 
     @Test
     void waitEventNode_hasTimeoutSeconds() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioNode wait = graph.getNodes().stream()
-                .filter(n -> "WAIT_EVENT".equals(n.getType()))
+        ScenarioGraph.ScenarioNode wait = graph.nodes().stream()
+                .filter(n -> "WAIT_EVENT".equals(n.type()))
                 .findFirst().orElseThrow();
 
-        assertEquals("EMAIL_OPENED", wait.getData().getEventType());
-        assertEquals(86400,          wait.getData().getTimeoutSeconds());
+        assertEquals("EMAIL_OPENED", wait.data().eventType());
+        assertEquals(86400,          wait.data().timeoutSeconds());
     }
 
     @Test
     void delayNode_hasDelaySeconds() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioNode delay = graph.getNodes().stream()
-                .filter(n -> "DELAY".equals(n.getType()))
+        ScenarioGraph.ScenarioNode delay = graph.nodes().stream()
+                .filter(n -> "DELAY".equals(n.type()))
                 .findFirst().orElseThrow();
 
-        assertEquals(3600, delay.getData().getDelaySeconds());
+        assertEquals(3600, delay.data().delaySeconds());
     }
 
     @Test
     void conditionNode_hasConditionFields() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioNode cond = graph.getNodes().stream()
-                .filter(n -> "CONDITION".equals(n.getType()))
+        ScenarioGraph.ScenarioNode cond = graph.nodes().stream()
+                .filter(n -> "CONDITION".equals(n.type()))
                 .findFirst().orElseThrow();
 
-        assertEquals("channel", cond.getData().getConditionField());
-        assertEquals("email",   cond.getData().getConditionValue());
+        assertEquals("channel", cond.data().conditionField());
+        assertEquals("email",   cond.data().conditionValue());
     }
 
     @Test
     void edges_deliveredHandle_isMapped() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioEdge deliveredEdge = graph.getEdges().stream()
-                .filter(e -> "delivered".equals(e.getSourceHandle()))
+        ScenarioGraph.ScenarioEdge deliveredEdge = graph.edges().stream()
+                .filter(e -> "delivered".equals(e.sourceHandle()))
                 .findFirst().orElseThrow();
 
-        assertEquals("node_2", deliveredEdge.getSource());
-        assertEquals("node_3", deliveredEdge.getTarget());
-        assertEquals("ON_DELIVERED", deliveredEdge.getData().getEdgeType());
+        assertEquals("node_2", deliveredEdge.source());
+        assertEquals("node_3", deliveredEdge.target());
+        assertEquals("ON_DELIVERED", deliveredEdge.data().edgeType());
     }
 
     @Test
     void edges_failedHandle_isMapped() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioEdge failedEdge = graph.getEdges().stream()
-                .filter(e -> "failed".equals(e.getSourceHandle()))
+        ScenarioGraph.ScenarioEdge failedEdge = graph.edges().stream()
+                .filter(e -> "failed".equals(e.sourceHandle()))
                 .findFirst().orElseThrow();
 
-        assertEquals("node_2", failedEdge.getSource());
-        assertEquals("node_6", failedEdge.getTarget());
+        assertEquals("node_2", failedEdge.source());
+        assertEquals("node_6", failedEdge.target());
     }
 
     @Test
     void edges_timeoutHandle_isMapped() throws Exception {
         ScenarioGraph graph = mapper.readValue(FULL_GRAPH_JSON, ScenarioGraph.class);
 
-        ScenarioGraph.ScenarioEdge timeoutEdge = graph.getEdges().stream()
-                .filter(e -> "timeout".equals(e.getSourceHandle()))
+        ScenarioGraph.ScenarioEdge timeoutEdge = graph.edges().stream()
+                .filter(e -> "timeout".equals(e.sourceHandle()))
                 .findFirst().orElseThrow();
 
-        assertEquals("node_3", timeoutEdge.getSource());
-        assertEquals("node_4", timeoutEdge.getTarget());
+        assertEquals("node_3", timeoutEdge.source());
+        assertEquals("node_4", timeoutEdge.target());
     }
 
     @Test
@@ -236,17 +236,17 @@ class ScenarioGraphTest {
                 {"nodes":[{"id":"n1","type":"END","data":{"label":"x","unknownField":"ignored"}}],"edges":[]}
                 """;
         ScenarioGraph graph = mapper.readValue(jsonWithExtra, ScenarioGraph.class);
-        assertEquals(1, graph.getNodes().size());
-        assertEquals("n1", graph.getNodes().get(0).getId());
+        assertEquals(1, graph.nodes().size());
+        assertEquals("n1", graph.nodes().get(0).id());
     }
 
     @Test
     void emptyGraph_deserializesCleanly() throws Exception {
         ScenarioGraph graph = mapper.readValue("{\"nodes\":[],\"edges\":[]}", ScenarioGraph.class);
-        assertNotNull(graph.getNodes());
-        assertNotNull(graph.getEdges());
-        assertTrue(graph.getNodes().isEmpty());
-        assertTrue(graph.getEdges().isEmpty());
+        assertNotNull(graph.nodes());
+        assertNotNull(graph.edges());
+        assertTrue(graph.nodes().isEmpty());
+        assertTrue(graph.edges().isEmpty());
     }
 
     @Test
@@ -255,8 +255,8 @@ class ScenarioGraphTest {
         String serialized      = mapper.writeValueAsString(original);
         ScenarioGraph restored = mapper.readValue(serialized, ScenarioGraph.class);
 
-        assertEquals(original.getNodes().size(), restored.getNodes().size());
-        assertEquals(original.getEdges().size(), restored.getEdges().size());
-        assertEquals(original.getNodes().get(0).getId(), restored.getNodes().get(0).getId());
+        assertEquals(original.nodes().size(), restored.nodes().size());
+        assertEquals(original.edges().size(), restored.edges().size());
+        assertEquals(original.nodes().get(0).id(), restored.nodes().get(0).id());
     }
 }

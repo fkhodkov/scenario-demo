@@ -50,10 +50,10 @@ class EventSignalServiceTest {
         verify(mockWf).onEvent(captor.capture());
 
         IncomingEvent signal = captor.getValue();
-        assertEquals("EMAIL_OPENED",  signal.getEventType());
-        assertEquals("email.opened",  signal.getTopic());
-        assertEquals("user_1",        signal.getUserId());
-        assertEquals("{\"msgId\":\"x\"}", signal.getPayload());
+        assertEquals("EMAIL_OPENED",  signal.eventType());
+        assertEquals("email.opened",  signal.topic());
+        assertEquals("user_1",        signal.userId());
+        assertEquals("{\"msgId\":\"x\"}", signal.payload());
     }
 
     @Test

@@ -43,9 +43,9 @@ class ScenarioActivitiesImplTest {
         SendResult result = activities.sendEmail("user_1", "tmpl_welcome", "{\"key\":\"val\"}");
 
         verify(kafkaTemplate).send(eq("comm.outbound"), eq("user_1"), contains("\"channel\":\"email\""));
-        assertTrue(result.isAccepted());
-        assertEquals("email", result.getChannel());
-        assertNotNull(result.getMessageId());
+        assertTrue(result.accepted());
+        assertEquals("email", result.channel());
+        assertNotNull(result.messageId());
     }
 
     @Test
@@ -61,7 +61,7 @@ class ScenarioActivitiesImplTest {
     void sendEmail_generatesUniqueMessageIds() {
         SendResult r1 = activities.sendEmail("u1", "t", null);
         SendResult r2 = activities.sendEmail("u1", "t", null);
-        assertNotEquals(r1.getMessageId(), r2.getMessageId());
+        assertNotEquals(r1.messageId(), r2.messageId());
     }
 
     // ── sendPush ──────────────────────────────────────────────────────────────
@@ -71,8 +71,8 @@ class ScenarioActivitiesImplTest {
         SendResult result = activities.sendPush("user_2", "tmpl_push", null);
 
         verify(kafkaTemplate).send(eq("comm.outbound"), eq("user_2"), contains("\"channel\":\"push\""));
-        assertTrue(result.isAccepted());
-        assertEquals("push", result.getChannel());
+        assertTrue(result.accepted());
+        assertEquals("push", result.channel());
     }
 
     // ── sendSms ───────────────────────────────────────────────────────────────
@@ -82,8 +82,8 @@ class ScenarioActivitiesImplTest {
         SendResult result = activities.sendSms("user_3", "tmpl_sms", null);
 
         verify(kafkaTemplate).send(eq("comm.outbound"), eq("user_3"), contains("\"channel\":\"sms\""));
-        assertTrue(result.isAccepted());
-        assertEquals("sms", result.getChannel());
+        assertTrue(result.accepted());
+        assertEquals("sms", result.channel());
     }
 
     // ── updateExecutionNode ───────────────────────────────────────────────────

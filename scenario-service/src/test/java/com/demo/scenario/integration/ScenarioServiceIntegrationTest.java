@@ -181,13 +181,18 @@ class ScenarioServiceIntegrationTest {
 
     @Test
     void findByUserId_returnsAllExecutionsForUser() throws Exception {
-        Scenario s = scenarioService.create("s", "d", GRAPH);
-        scenarioService.activate(s.getId());
+        // Bob runs two DIFFERENT scenarios — each gets its own execution
+        String g2 = GRAPH.replace("user.registered", "purchase.completed")
+                         .replace("USER_REGISTERED", "PURCHASE_COMPLETED");
+        Scenario s1 = scenarioService.create("s1", "d", GRAPH);
+        Scenario s2 = scenarioService.create("s2", "d", g2);
+        scenarioService.activate(s1.getId());
+        scenarioService.activate(s2.getId());
         stubWorkflowClient();
 
-        scenarioService.startExecution(s.getId(), "bob", "{}");
-        scenarioService.startExecution(s.getId(), "bob", "{}");
-        scenarioService.startExecution(s.getId(), "carol", "{}");
+        scenarioService.startExecution(s1.getId(), "bob", "{}");
+        scenarioService.startExecution(s2.getId(), "bob", "{}");
+        scenarioService.startExecution(s1.getId(), "carol", "{}");
 
         List<ScenarioExecution> bobExecs = executionRepo.findByUserId("bob");
         assertEquals(2, bobExecs.size());

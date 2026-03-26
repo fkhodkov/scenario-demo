@@ -139,10 +139,10 @@ public class ScenarioService {
     /** Returns [triggerTopic, triggerEventType] from the graph's TRIGGER node. */
     private String[] extractTrigger(String definitionJson) throws Exception {
         ScenarioGraph graph = objectMapper.readValue(definitionJson, ScenarioGraph.class);
-        if (graph.getNodes() != null) {
-            for (ScenarioGraph.ScenarioNode node : graph.getNodes()) {
-                if ("TRIGGER".equals(node.getType()) && node.getData() != null) {
-                    return new String[]{ node.getData().getTopic(), node.getData().getEventType() };
+        if (graph.nodes() != null) {
+            for (ScenarioGraph.ScenarioNode node : graph.nodes()) {
+                if ("TRIGGER".equals(node.type()) && node.data() != null) {
+                    return new String[]{ node.data().topic(), node.data().eventType() };
                 }
             }
         }

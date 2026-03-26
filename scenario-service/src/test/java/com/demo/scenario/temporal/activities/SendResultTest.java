@@ -7,28 +7,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class SendResultTest {
 
     @Test
-    void allArgsConstructor_setsFields() {
+    void constructor_setsFields() {
         SendResult r = new SendResult("msg-123", true, "email");
-        assertEquals("msg-123", r.getMessageId());
-        assertTrue(r.isAccepted());
-        assertEquals("email", r.getChannel());
-    }
-
-    @Test
-    void noArgsConstructor_thenSetters() {
-        SendResult r = new SendResult();
-        r.setMessageId("msg-456");
-        r.setAccepted(false);
-        r.setChannel("push");
-
-        assertEquals("msg-456", r.getMessageId());
-        assertFalse(r.isAccepted());
-        assertEquals("push", r.getChannel());
+        assertEquals("msg-123", r.messageId());
+        assertTrue(r.accepted());
+        assertEquals("email", r.channel());
     }
 
     @Test
     void notAccepted_representsUnsubscribed() {
         SendResult r = new SendResult("msg-789", false, "sms");
-        assertFalse(r.isAccepted(), "accepted=false means user is unsubscribed or blocked");
+        assertFalse(r.accepted(), "accepted=false means user is unsubscribed or blocked");
+    }
+
+    @Test
+    void recordEquality() {
+        assertEquals(new SendResult("x", true, "email"), new SendResult("x", true, "email"));
+        assertNotEquals(new SendResult("x", true, "email"), new SendResult("x", false, "email"));
     }
 }
