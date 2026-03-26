@@ -1,10 +1,18 @@
 package com.demo.events.dto;
+
 import com.demo.events.spec.KafkaEvent;
-@KafkaEvent(name="PUSH_FAILED", topic="push.failed", description="Push delivery failed")
-public class PushFailedEvent extends BaseEvent {
-    public String notificationId; public String reason;
-    public PushFailedEvent() {}
-    public PushFailedEvent(String userId, String notificationId, String reason) {
-        super(userId); this.notificationId = notificationId; this.reason = reason;
+import java.time.Instant;
+import java.util.UUID;
+
+@KafkaEvent(name = "PUSH_FAILED", topic = "push.failed", description = "Push delivery failed")
+public record PushFailedEvent(
+        String  eventId,
+        String  userId,
+        Instant occurredAt,
+        String  notificationId,
+        String  reason
+) implements BaseEvent {
+    public static PushFailedEvent of(String userId, String notificationId, String reason) {
+        return new PushFailedEvent(UUID.randomUUID().toString(), userId, Instant.now(), notificationId, reason);
     }
 }

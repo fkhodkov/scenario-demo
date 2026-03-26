@@ -4,8 +4,19 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.Instant;
-import java.util.UUID;
 
+/**
+ * Sealed interface for all Kafka event DTOs.
+ *
+ * Implementations are records — immutable, self-describing, exhaustively
+ * known to the compiler. The sealed hierarchy replaces the old abstract class
+ * so switch expressions over event types are exhaustiveness-checked.
+ *
+ * Jackson uses @JsonTypeInfo to embed "eventType" in the JSON and
+ * @JsonSubTypes to route deserialization to the correct record.
+ * Records are deserialized via their canonical constructor (field names
+ * must match JSON property names).
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "eventType")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = UserRegisteredEvent.class,    name = "USER_REGISTERED"),
@@ -22,11 +33,14 @@ import java.util.UUID;
     @JsonSubTypes.Type(value = UserUnsubscribedEvent.class,  name = "USER_UNSUBSCRIBED"),
     @JsonSubTypes.Type(value = PurchaseCompletedEvent.class, name = "PURCHASE_COMPLETED")
 })
-public abstract class BaseEvent {
-    public String eventId = UUID.randomUUID().toString();
-    public String userId;
-    public Instant occurredAt = Instant.now();
+public sealed interface BaseEvent
+        permits UserRegisteredEvent, EmailSentEvent, EmailDeliveredEvent,
+                EmailFailedEvent, EmailOpenedEvent, LinkClickedEvent,
+                PushSentEvent, PushDeliveredEvent, PushFailedEvent,
+                SmsDeliveredEvent, SmsFailedEvent,
+                UserUnsubscribedEvent, PurchaseCompletedEvent {
 
-    protected BaseEvent() {}
-    protected BaseEvent(String userId) { this.userId = userId; }
+    String  eventId();
+    String  userId();
+    Instant occurredAt();
 }

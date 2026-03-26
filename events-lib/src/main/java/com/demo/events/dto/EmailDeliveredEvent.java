@@ -1,8 +1,17 @@
 package com.demo.events.dto;
+
 import com.demo.events.spec.KafkaEvent;
-@KafkaEvent(name="EMAIL_DELIVERED", topic="email.delivered", description="Email confirmed delivered by provider")
-public class EmailDeliveredEvent extends BaseEvent {
-    public String messageId;
-    public EmailDeliveredEvent() {}
-    public EmailDeliveredEvent(String userId, String messageId) { super(userId); this.messageId = messageId; }
+import java.time.Instant;
+import java.util.UUID;
+
+@KafkaEvent(name = "EMAIL_DELIVERED", topic = "email.delivered", description = "Email confirmed delivered by provider")
+public record EmailDeliveredEvent(
+        String  eventId,
+        String  userId,
+        Instant occurredAt,
+        String  messageId
+) implements BaseEvent {
+    public static EmailDeliveredEvent of(String userId, String messageId) {
+        return new EmailDeliveredEvent(UUID.randomUUID().toString(), userId, Instant.now(), messageId);
+    }
 }
