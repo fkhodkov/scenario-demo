@@ -2,6 +2,7 @@ package com.demo.scenario.kafka;
 
 import com.demo.events.spec.EventRegistry;
 import com.demo.scenario.domain.ScenarioStatus;
+import java.util.List;
 import com.demo.scenario.repository.ScenarioRepository;
 import com.demo.scenario.service.EventSignalService;
 import com.demo.scenario.service.ScenarioService;
@@ -34,7 +35,11 @@ public class UniversalEventConsumer {
     }
 
     @KafkaListener(
-        topicPattern = ".*",
+        // Listen to all topics EXCEPT internal ones that must not feed back into the engine.
+        // comm.outbound carries outbound communication payloads to the simulator — consuming
+        // it here would cause the workflow engine to treat every outgoing push/email/SMS as
+        // an inbound user event, breaking the scenario execution.
+        topicPattern = "^(?!comm\\.).*",
         groupId = "scenario-universal-consumer",
         concurrency = "3"
     )
@@ -62,20 +67,22 @@ public class UniversalEventConsumer {
         String payloadEventType = extractEventType(payload);
         String effectiveEventType = payloadEventType != null ? payloadEventType : eventType;
 
-        // 1. Start new workflow if this topic triggers an active scenario
-        scenarioRepo.findByTriggerTopic(topic).ifPresent(scenario -> {
-            if (scenario.getStatus() == ScenarioStatus.ACTIVE) {
-                String triggerEventType = scenario.getTriggerEventType();
-                if (triggerEventType == null || triggerEventType.equalsIgnoreCase(effectiveEventType)) {
-                    try {
-                        scenarioService.startExecution(scenario.getId(), userId, payload);
-                    } catch (Exception e) {
-                        log.error("Failed to start execution for scenario {} user {}: {}",
-                                scenario.getId(), userId, e.getMessage());
-                    }
+        // 1. Start new workflow for every ACTIVE scenario triggered by this topic.
+        //    Using findByTriggerTopicAndStatus (returns List) so multiple active scenarios
+        //    on the same topic all fire — and avoids IncorrectResultSizeDataAccessException.
+        List<com.demo.scenario.domain.Scenario> triggered =
+                scenarioRepo.findByTriggerTopicAndStatus(topic, ScenarioStatus.ACTIVE);
+        for (com.demo.scenario.domain.Scenario scenario : triggered) {
+            String triggerEventType = scenario.getTriggerEventType();
+            if (triggerEventType == null || triggerEventType.equalsIgnoreCase(effectiveEventType)) {
+                try {
+                    scenarioService.startExecution(scenario.getId(), userId, payload);
+                } catch (Exception e) {
+                    log.error("Failed to start execution for scenario {} user {}: {}",
+                            scenario.getId(), userId, e.getMessage());
                 }
             }
-        });
+        }
 
         // 2. Signal all running workflows for this user
         signalService.routeEventToWorkflows(userId, eventType, topic, payload);

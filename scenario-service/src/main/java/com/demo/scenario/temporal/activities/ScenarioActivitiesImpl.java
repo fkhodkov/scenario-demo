@@ -36,7 +36,11 @@ public class ScenarioActivitiesImpl implements ScenarioActivities {
                 "\",\"messageId\":\"" + messageId +
                 "\",\"templateId\":\"" + templateId +
                 "\",\"payload\":" + (payload == null ? "{}" : payload) + "}";
-        kafkaTemplate.send("comm.outbound", userId, json);
+        try {
+            kafkaTemplate.send("comm.outbound", userId, json).get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to publish email to comm.outbound: " + e.getMessage(), e);
+        }
         return new SendResult(messageId, true, "email");
     }
 
@@ -48,7 +52,11 @@ public class ScenarioActivitiesImpl implements ScenarioActivities {
                 "\",\"messageId\":\"" + messageId +
                 "\",\"templateId\":\"" + templateId +
                 "\",\"payload\":" + (payload == null ? "{}" : payload) + "}";
-        kafkaTemplate.send("comm.outbound", userId, json);
+        try {
+            kafkaTemplate.send("comm.outbound", userId, json).get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to publish push to comm.outbound: " + e.getMessage(), e);
+        }
         return new SendResult(messageId, true, "push");
     }
 
@@ -60,7 +68,11 @@ public class ScenarioActivitiesImpl implements ScenarioActivities {
                 "\",\"messageId\":\"" + messageId +
                 "\",\"templateId\":\"" + templateId +
                 "\",\"payload\":" + (payload == null ? "{}" : payload) + "}";
-        kafkaTemplate.send("comm.outbound", userId, json);
+        try {
+            kafkaTemplate.send("comm.outbound", userId, json).get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to publish sms to comm.outbound: " + e.getMessage(), e);
+        }
         return new SendResult(messageId, true, "sms");
     }
 

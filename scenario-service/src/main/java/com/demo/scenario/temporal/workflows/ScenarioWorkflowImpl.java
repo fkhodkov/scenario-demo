@@ -210,9 +210,12 @@ public class ScenarioWorkflowImpl implements ScenarioWorkflow {
 
     private ScenarioNode followDefaultEdge(ScenarioNode node, ScenarioGraph graph,
                                             Map<String, ScenarioNode> nodeMap) {
+        // React Flow names the generic output handle "out" (from OutRight component).
+        // Also accept null and "default" for backwards compatibility.
         return outgoing(node, graph).stream()
                 .filter(e -> e.sourceHandle() == null
-                          || "default".equalsIgnoreCase(e.sourceHandle()))
+                          || "default".equalsIgnoreCase(e.sourceHandle())
+                          || "out".equalsIgnoreCase(e.sourceHandle()))
                 .findFirst()
                 .map(e -> nodeMap.get(e.target()))
                 .orElse(null);

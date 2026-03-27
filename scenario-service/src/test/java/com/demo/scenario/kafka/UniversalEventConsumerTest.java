@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -41,7 +41,8 @@ class UniversalEventConsumerTest {
         UUID scenarioId = UUID.randomUUID();
         Scenario scenario = buildScenario(scenarioId, "user.registered",
                 "USER_REGISTERED", ScenarioStatus.ACTIVE);
-        when(scenarioRepo.findByTriggerTopic("user.registered")).thenReturn(Optional.of(scenario));
+        when(scenarioRepo.findByTriggerTopicAndStatus("user.registered", ScenarioStatus.ACTIVE))
+                .thenReturn(List.of(scenario));
 
         String payload = "{\"userId\":\"user_1\",\"eventType\":\"USER_REGISTERED\"}";
         consumer.consume(record("user.registered", "user_1", payload));
@@ -50,11 +51,9 @@ class UniversalEventConsumerTest {
     }
 
     @Test
-    void consume_draftScenario_doesNotStartExecution() throws Exception {
-        UUID scenarioId = UUID.randomUUID();
-        Scenario scenario = buildScenario(scenarioId, "user.registered",
-                "USER_REGISTERED", ScenarioStatus.DRAFT);
-        when(scenarioRepo.findByTriggerTopic("user.registered")).thenReturn(Optional.of(scenario));
+    void consume_noActiveScenarioForTopic_doesNotStartExecution() throws Exception {
+        when(scenarioRepo.findByTriggerTopicAndStatus("user.registered", ScenarioStatus.ACTIVE))
+                .thenReturn(List.of());
 
         String payload = "{\"userId\":\"user_1\",\"eventType\":\"USER_REGISTERED\"}";
         consumer.consume(record("user.registered", "user_1", payload));
@@ -64,7 +63,8 @@ class UniversalEventConsumerTest {
 
     @Test
     void consume_noScenarioForTopic_onlySignals() throws Exception {
-        when(scenarioRepo.findByTriggerTopic("email.opened")).thenReturn(Optional.empty());
+        when(scenarioRepo.findByTriggerTopicAndStatus("email.opened", ScenarioStatus.ACTIVE))
+                .thenReturn(List.of());
 
         String payload = "{\"userId\":\"user_1\",\"messageId\":\"msg_1\"}";
         consumer.consume(record("email.opened", "user_1", payload));
@@ -79,13 +79,29 @@ class UniversalEventConsumerTest {
         UUID scenarioId = UUID.randomUUID();
         Scenario scenario = buildScenario(scenarioId, "user.registered",
                 "USER_REGISTERED", ScenarioStatus.ACTIVE);
-        when(scenarioRepo.findByTriggerTopic("user.registered")).thenReturn(Optional.of(scenario));
+        when(scenarioRepo.findByTriggerTopicAndStatus("user.registered", ScenarioStatus.ACTIVE))
+                .thenReturn(List.of(scenario));
 
         // Payload has a different eventType than the scenario expects
         String payload = "{\"userId\":\"user_1\",\"eventType\":\"USER_UPDATED\"}";
         consumer.consume(record("user.registered", "user_1", payload));
 
         verify(scenarioService, never()).startExecution(any(), any(), any());
+    }
+
+    @Test
+    void consume_multipleActiveScenarios_startsAll() throws Exception {
+        UUID id1 = UUID.randomUUID(), id2 = UUID.randomUUID();
+        Scenario s1 = buildScenario(id1, "user.registered", "USER_REGISTERED", ScenarioStatus.ACTIVE);
+        Scenario s2 = buildScenario(id2, "user.registered", "USER_REGISTERED", ScenarioStatus.ACTIVE);
+        when(scenarioRepo.findByTriggerTopicAndStatus("user.registered", ScenarioStatus.ACTIVE))
+                .thenReturn(List.of(s1, s2));
+
+        String payload = "{\"userId\":\"user_1\",\"eventType\":\"USER_REGISTERED\"}";
+        consumer.consume(record("user.registered", "user_1", payload));
+
+        verify(scenarioService).startExecution(eq(id1), eq("user_1"), eq(payload));
+        verify(scenarioService).startExecution(eq(id2), eq("user_1"), eq(payload));
     }
 
     @Test
@@ -115,7 +131,8 @@ class UniversalEventConsumerTest {
 
     @Test
     void consume_alwaysSignalsRunningWorkflows() throws Exception {
-        when(scenarioRepo.findByTriggerTopic(any())).thenReturn(Optional.empty());
+        when(scenarioRepo.findByTriggerTopicAndStatus(any(), eq(ScenarioStatus.ACTIVE)))
+                .thenReturn(List.of());
 
         String payload = "{\"userId\":\"user_99\",\"messageId\":\"m1\"}";
         consumer.consume(record("email.delivered", "user_99", payload));
@@ -129,7 +146,8 @@ class UniversalEventConsumerTest {
         UUID scenarioId = UUID.randomUUID();
         Scenario scenario = buildScenario(scenarioId, "user.registered",
                 "USER_REGISTERED", ScenarioStatus.ACTIVE);
-        when(scenarioRepo.findByTriggerTopic("user.registered")).thenReturn(Optional.of(scenario));
+        when(scenarioRepo.findByTriggerTopicAndStatus("user.registered", ScenarioStatus.ACTIVE))
+                .thenReturn(List.of(scenario));
         when(scenarioService.startExecution(any(), any(), any()))
                 .thenThrow(new RuntimeException("Temporal unavailable"));
 

@@ -10,6 +10,6 @@ import java.util.UUID;
 
 public interface ScenarioRepository extends JpaRepository<Scenario, UUID> {
     List<Scenario> findByStatus(ScenarioStatus status);
-    Optional<Scenario> findByTriggerTopic(String topic);
+    List<Scenario> findByTriggerTopicAndStatus(String topic, ScenarioStatus status);
     List<Scenario> findByTriggerTopicIn(List<String> topics);
 }

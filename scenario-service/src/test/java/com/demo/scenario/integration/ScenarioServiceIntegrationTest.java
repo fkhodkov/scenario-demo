@@ -176,7 +176,7 @@ class ScenarioServiceIntegrationTest {
     @Test
     void findByTriggerTopic_returnsMatchingScenario() throws Exception {
         scenarioService.create("s", "d", GRAPH);
-        assertTrue(scenarioRepo.findByTriggerTopic("user.registered").isPresent());
+        assertFalse(scenarioRepo.findByTriggerTopicAndStatus("user.registered", com.demo.scenario.domain.ScenarioStatus.DRAFT).isEmpty());
     }
 
     @Test
