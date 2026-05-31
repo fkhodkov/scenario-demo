@@ -4,7 +4,6 @@ spring:
   # For pure unit tests that don't load a Spring context this file is ignored anyway.
   datasource:
     url: jdbc:tc:postgresql:16:///scenarios?TC_REUSABLE=true
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     username: test
     password: test
   jpa:

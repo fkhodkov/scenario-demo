@@ -16,6 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,10 +37,19 @@ class ScenarioActivitiesImplTest {
         activities = new ScenarioActivitiesImpl(kafkaTemplate, scenarioRepo, executionRepo);
     }
 
+    /** Stubs kafkaTemplate.send() to return a completed future — needed in any test that
+     *  invokes a send activity, since .get() is now called on the result. */
+    @SuppressWarnings("unchecked")
+    private void stubKafkaSend() {
+        when(kafkaTemplate.send(anyString(), anyString(), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+    }
+
     // ── sendEmail ─────────────────────────────────────────────────────────────
 
     @Test
     void sendEmail_publishesToOutboundTopic() {
+        stubKafkaSend();
         SendResult result = activities.sendEmail("user_1", "tmpl_welcome", "{\"key\":\"val\"}");
 
         verify(kafkaTemplate).send(eq("comm.outbound"), eq("user_1"), contains("\"channel\":\"email\""));
@@ -50,6 +60,7 @@ class ScenarioActivitiesImplTest {
 
     @Test
     void sendEmail_nullPayload_usesEmptyObject() {
+        stubKafkaSend();
         activities.sendEmail("user_1", "tmpl", null);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -59,6 +70,7 @@ class ScenarioActivitiesImplTest {
 
     @Test
     void sendEmail_generatesUniqueMessageIds() {
+        stubKafkaSend();
         SendResult r1 = activities.sendEmail("u1", "t", null);
         SendResult r2 = activities.sendEmail("u1", "t", null);
         assertNotEquals(r1.messageId(), r2.messageId());
@@ -68,6 +80,7 @@ class ScenarioActivitiesImplTest {
 
     @Test
     void sendPush_publishesToOutboundTopic() {
+        stubKafkaSend();
         SendResult result = activities.sendPush("user_2", "tmpl_push", null);
 
         verify(kafkaTemplate).send(eq("comm.outbound"), eq("user_2"), contains("\"channel\":\"push\""));
@@ -79,6 +92,7 @@ class ScenarioActivitiesImplTest {
 
     @Test
     void sendSms_publishesToOutboundTopic() {
+        stubKafkaSend();
         SendResult result = activities.sendSms("user_3", "tmpl_sms", null);
 
         verify(kafkaTemplate).send(eq("comm.outbound"), eq("user_3"), contains("\"channel\":\"sms\""));
