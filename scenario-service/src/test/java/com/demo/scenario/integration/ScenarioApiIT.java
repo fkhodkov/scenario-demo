@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Full Spring Boot integration test: real JPA (H2), real REST layer,
+ * Full Spring Boot integration test: real JPA (Testcontainers PostgreSQL), real REST layer,
  * embedded Kafka. Temporal is mocked — no Temporal server needed.
  *
  * IT suffix → picked up by maven-failsafe (integration-test phase).
